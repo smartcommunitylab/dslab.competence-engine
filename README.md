@@ -6,14 +6,14 @@ to query and navigate skill, competence, occupation ontology data.
 # ESCO Core
 Engine for query and navigate ESCO ontology data
 
-##Data Import
+## Data Import
 In order to import dataset for manipulation and indexing, one need to call the following APIs
 
 /admin/index/all
 
 The API expects a parameter 'path' which corresponds to location of dataset csv files
 
-##Search Query
+## Search Query
 
 The API execpt 'text' parameter as input search key and 'size' parameter determine the number of skills to search.
 
