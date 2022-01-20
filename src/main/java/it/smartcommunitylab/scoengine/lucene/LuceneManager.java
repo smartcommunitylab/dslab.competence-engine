@@ -18,17 +18,22 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParserBase;
 import org.apache.lucene.queryparser.simple.SimpleQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +46,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import eu.fbk.dh.tint.runner.TintPipeline;
+import it.smartcommunitylab.scoengine.common.Const;
 import it.smartcommunitylab.scoengine.common.Utils;
 import it.smartcommunitylab.scoengine.model.TextDoc;
 
@@ -144,9 +150,47 @@ public class LuceneManager {
 			textDoc.getFields().put("uri", doc.get("uri"));
 			textDoc.getFields().put("description", doc.get("description"));
 			textDoc.getFields().put("hiearchy","");
+			textDoc.getFields().put("reuseLevel", doc.get("reuseLevel"));
 			result.add(textDoc);
 		}
 		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), concetType, iscoGroup, text);
+		return result;
+	}
+	
+	public List<TextDoc> searchBySingleField(String fieldTitle, String fieldValue, int maxResult) throws IOException, ParseException {
+		SimpleQueryParser simpleParser = new SimpleQueryParser(analyzer, fieldTitle);
+		Query typeQuery = simpleParser.parse(fieldValue);
+		BooleanQuery booleanQuery = new BooleanQuery.Builder().add(typeQuery, BooleanClause.Occur.SHOULD).build();		
+		ScoreDoc[] hits = isearcher.search(booleanQuery, maxResult).scoreDocs;
+		List<TextDoc> result = new ArrayList<TextDoc>();
+		for(ScoreDoc scoreDoc : hits) {
+			Document doc = isearcher.doc(scoreDoc.doc);
+			TextDoc textDoc = new TextDoc();
+			textDoc.getFields().put("preferredLabel", doc.get("preferredLabel"));
+			textDoc.getFields().put("altLabels", doc.get("altLabels"));
+			textDoc.getFields().put("conceptType", doc.get("conceptType"));
+			textDoc.getFields().put("uri", doc.get("uri"));
+			result.add(textDoc);
+		}
+		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), fieldTitle, fieldValue);
+		return result;
+	}
+	
+	public List<TextDoc> searchByURI(String url, int maxResult) throws IOException, ParseException {		
+		TermQuery tq= new TermQuery(new Term(Const.ESCO_STORE_URI, url));
+		BooleanQuery bq = new BooleanQuery.Builder().add(tq, BooleanClause.Occur.SHOULD).build();		
+		ScoreDoc[] hits = isearcher.search(bq, maxResult).scoreDocs;
+		List<TextDoc> result = new ArrayList<TextDoc>();
+		for(ScoreDoc scoreDoc : hits) {
+			Document doc = isearcher.doc(scoreDoc.doc);
+			TextDoc textDoc = new TextDoc();
+			textDoc.getFields().put("preferredLabel", doc.get("preferredLabel"));
+			textDoc.getFields().put("altLabels", doc.get("altLabels"));
+			textDoc.getFields().put("conceptType", doc.get("conceptType"));
+			textDoc.getFields().put("uri", doc.get("uri"));
+			result.add(textDoc);
+		}
+		logger.debug("searchByUri:{}/{}", url, result.size());
 		return result;
 	}
 }

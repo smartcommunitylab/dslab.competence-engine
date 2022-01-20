@@ -22,6 +22,14 @@ public class AdminController implements SCOController {
 		logger.info("indexAll:{}", path);
 	}
 	
+	@GetMapping(value="/admin/import/all")
+	public void importAll(@RequestParam String path) throws Exception {
+		csvManager.importSkills(path + "/skills_it.csv", "it");
+		csvManager.importSkillChildRelations(path + "/skillSkillRelations.csv");
+		csvManager.importSkillBroaderRelation(path + "/broaderRelationsSkillPillar.csv");
+		logger.info("importAll:{}", path);
+	}
+	
 	
 	
 }
