@@ -19,10 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import it.smartcommunitylab.scoengine.common.Const;
 import it.smartcommunitylab.scoengine.lucene.LuceneManager;
 import it.smartcommunitylab.scoengine.model.TextDoc;
+import it.smartcommunitylab.scoengine.model.esco.Level;
 import it.smartcommunitylab.scoengine.model.esco.ResourceLink;
 import it.smartcommunitylab.scoengine.model.esco.Skill;
+import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
+import it.smartcommunitylab.scoengine.repository.SkillGroupRepository;
 import it.smartcommunitylab.scoengine.repository.SkillRepository;
 
 @Component
@@ -33,6 +37,8 @@ public class CsvManager {
 	private LuceneManager luceneManager;
 	@Autowired
 	private SkillRepository skillRepository;
+	@Autowired
+	private SkillGroupRepository skillGroupRepository;
 
 	public void indexSkills(String csvFilePath) throws IOException {
 		List<Document> docs = new ArrayList<Document>();
@@ -104,11 +110,10 @@ public class CsvManager {
 		reader.close();
 	}
 
-	public void importSkillChildRelations(String csvFilePath) throws IOException {
+	public void importSkillEssentialRelations(String csvFilePath) throws IOException {
 		Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));
-		CSVFormat csvFormat = CSVFormat.DEFAULT
-				.withHeader("originalSkillUri", "relationType", "relatedSkillType", "relatedSkillUri")
-				.withSkipHeaderRecord();
+		CSVFormat csvFormat = CSVFormat.DEFAULT.withHeader("originalSkillUri", "originalSkillType", "relationType",
+				"relatedSkillType", "relatedSkillUri").withSkipHeaderRecord();
 		CSVParser csvParser = new CSVParser(reader, csvFormat);
 		for (CSVRecord record : csvParser) {
 			String originalSkillUri = record.get("originalSkillUri");
@@ -123,28 +128,27 @@ public class CsvManager {
 				if (optionalSkill.isPresent()) {
 					Skill skill = optionalSkill.get();
 					if ("essential".equals(relationType)) {
-						if (!originalSkill.getIsEssentialForOccupation().contains(relatedSkillUri)) {
-							originalSkill.getIsEssentialForOccupation().add(relatedSkillUri);
+						if (!originalSkill.getIsEssentialSkill().contains(relatedSkillUri)) {
+							originalSkill.getIsEssentialSkill().add(relatedSkillUri);
 							ResourceLink rLink = new ResourceLink();
 							rLink.setPreferredLabel(skill.getPreferredLabel());
 							rLink.setUri(skill.getUri());
 							rLink.setConceptType(skill.getConceptType());
-							originalSkill.getIsEssentialForOccupationLink().add(rLink);
-							skillRepository.save(skill);
+							originalSkill.getIsEssentialSkillLink().add(rLink);
+							skillRepository.save(originalSkill);
 						}
 					} else {
-						if (!originalSkill.getIsOptionalForOccupation().contains(relatedSkillUri)) {
-							originalSkill.getIsOptionalForOccupation().add(relatedSkillUri);
+						if (!originalSkill.getIsOptionalSkill().contains(relatedSkillUri)) {
+							originalSkill.getIsOptionalSkill().add(relatedSkillUri);
 							ResourceLink rLink = new ResourceLink();
 							rLink.setPreferredLabel(skill.getPreferredLabel());
 							rLink.setUri(skill.getUri());
 							rLink.setConceptType(skill.getConceptType());
-							originalSkill.getIsOptionalForOccupationLink().add(rLink);
-							skillRepository.save(skill);
+							originalSkill.getIsOptionalSkillLink().add(rLink);
+							skillRepository.save(originalSkill);
 						}
 					}
 				}
-				skillRepository.save(originalSkill);
 				logger.info("importSkillEssentialRelations:{}", originalSkillUri);
 			}
 		}
@@ -160,42 +164,170 @@ public class CsvManager {
 		for (CSVRecord record : csvParser) {
 			String skillUri = record.get("conceptUri");
 			String broaderSkillUri = record.get("broaderUri");
+			String broaderType = record.get("broaderType");
 			Optional<Skill> optionalSkill = skillRepository.findById(skillUri);
 			Optional<Skill> optionalBroaderSkill = skillRepository.findById(broaderSkillUri);
-			if (optionalSkill.isEmpty() || optionalBroaderSkill.isEmpty()) {
+			if (optionalSkill.isEmpty()) {
 				logger.info("skip skill relation:{} / {}", skillUri, broaderSkillUri);
 				continue;
 			}
 			Skill skill = optionalSkill.get();
+			if (broaderType.equals(Const.ESCO_CONCEPT_SKILL_GROUP)) {
+				if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
+					skill.getBroaderSkill().add(broaderSkillUri);
+					ResourceLink rLink = new ResourceLink();
+					rLink.setUri(broaderSkillUri);
+					rLink.setConceptType(broaderType);
+					skill.getBroaderSkillLink().add(rLink);
+					skillRepository.save(skill);
+				}
+				continue;
+			}
 			Skill broaderSkill = optionalBroaderSkill.get();
-			if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
-				skill.getBroaderSkill().add(broaderSkillUri);
-				ResourceLink rLink = new ResourceLink();
-				rLink.setPreferredLabel(broaderSkill.getPreferredLabel());
-				rLink.setUri(broaderSkill.getUri());
-				rLink.setConceptType(broaderSkill.getConceptType());
-				skill.getBroaderSkillLink().add(rLink);
-				skillRepository.save(skill);
-			}
-			if (!broaderSkill.getNarrowerSkill().contains(skillUri)) {
-				broaderSkill.getNarrowerSkill().add(skillUri);
-				ResourceLink rLink = new ResourceLink();
-				rLink.setPreferredLabel(skill.getPreferredLabel());
-				rLink.setUri(skill.getUri());
-				rLink.setConceptType(skill.getConceptType());
-				broaderSkill.getNarrowerSkillLink().add(rLink);
-				skillRepository.save(broaderSkill);
-			}
-			logger.info("importSkillParentChildRelations:{}/{}", skillUri, broaderSkillUri);
-		}
-		// add skill group object and then create 2 different API that return object as per type once for competenceDetails one for group details.
-		// if present skill hierachy in this file -> conceptUri value ()
-// Level 0 URI	Level 0 preferred term	Level 1 URI	Level 1 preferred term	Level 2 URI	Level 2 preferred term	Level 3 URI	Level 3 preferred term	Description	Scope note	Level 0 code	Level 1 code	Level 2 code	Level 3 code
+			if (!optionalBroaderSkill.isEmpty()) {
+				if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
+					skill.getBroaderSkill().add(broaderSkillUri);
+					ResourceLink rLink = new ResourceLink();
+					rLink.setPreferredLabel(broaderSkill.getPreferredLabel());
+					rLink.setUri(broaderSkill.getUri());
+					rLink.setConceptType(broaderSkill.getConceptType());
+					skill.getBroaderSkillLink().add(rLink);
+					skillRepository.save(skill);
+				}
+				if (!broaderSkill.getNarrowerSkill().contains(skillUri)) {
+					broaderSkill.getNarrowerSkill().add(skillUri);
+					ResourceLink rLink = new ResourceLink();
+					rLink.setPreferredLabel(skill.getPreferredLabel());
+					rLink.setUri(skill.getUri());
+					rLink.setConceptType(skill.getConceptType());
+					broaderSkill.getNarrowerSkillLink().add(rLink);
+					skillRepository.save(broaderSkill);
+				}
 
-		
+				logger.info("importSkillParentChildRelations:{}/{}", skillUri, broaderSkillUri);
+			}
+		}
 		csvParser.close();
 		reader.close();
+	}
 
+	public void importSkillGroups(String csvFilePath, String lang) throws IOException {
+		Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));
+		CSVFormat csvFormat = CSVFormat.DEFAULT.withHeader("conceptType", "conceptUri", "preferredLabel", "altLabels",
+				"hiddenLabels", "status", "modifiedDate", "scopeNote", "inScheme", "description", "code")
+				.withSkipHeaderRecord();
+		CSVParser csvParser = new CSVParser(reader, csvFormat);
+		for (CSVRecord record : csvParser) {
+			String uri = record.get("conceptUri");
+			String conceptType = record.get("conceptType");
+			String preferredLabel = record.get("preferredLabel");
+			String altLabels = record.get("altLabels");
+			String description = record.get("description");
+			String code = record.get("code");
+			SkillGroup skillGroup = null;
+			Optional<SkillGroup> optionalSkillGroup = skillGroupRepository.findById(uri);
+			if (optionalSkillGroup.isEmpty()) {
+				skillGroup = new SkillGroup();
+				skillGroup.setUri(uri);
+				skillGroup.setConceptType(conceptType);
+				skillGroup.setCode(code);
+			} else {
+				skillGroup = optionalSkillGroup.get();
+			}
+			skillGroup.getPreferredLabel().put(lang, preferredLabel);
+			skillGroup.getAltLabels().put(lang, altLabels);
+			skillGroup.getDescription().put(lang, description);
+			skillGroupRepository.save(skillGroup);
+			logger.info("importSkillGroups:{}/{}", lang, uri);
+		}
+		csvParser.close();
+		reader.close();
+	}
+
+	public void importSkillGroupsHierarchy(String csvFilePath, String lang) throws IOException {
+		Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));
+		CSVFormat csvFormat = CSVFormat.DEFAULT
+				.withHeader("Level 0 URI", "Level 0 preferred term", "Level 1 URI", "Level 1 preferred term",
+						"Level 2 URI", "Level 2 preferred term", "Level 3 URI", "Level 3 preferred term", "Description",
+						"Scope note", "Level 0 code", "Level 1 code", "Level 2 code", "Level 3 code")
+				.withSkipHeaderRecord();
+		CSVParser csvParser = new CSVParser(reader, csvFormat);
+		for (CSVRecord record : csvParser) {
+			String uriLevel0 = record.get("Level 0 URI");
+			String preferredTermLevel0 = record.get("Level 0 preferred term");
+			String codeLevel0 = record.get("Level 0 code");
+			String uriLevel1 = record.get("Level 1 URI");
+			String preferredTermLevel1 = record.get("Level 1 preferred term");
+			String codeLevel1 = record.get("Level 1 code");
+			String uriLevel2 = record.get("Level 2 URI");
+			String preferredTermLevel2 = record.get("Level 2 preferred term");
+			String codeLevel2 = record.get("Level 2 code");
+			String uriLevel3 = record.get("Level 3 URI");
+			String preferredTermLevel3 = record.get("Level 3 preferred term");
+			String codeLevel3 = record.get("Level 3 code");
+			String levelGroupDescription = record.get("Description");
+
+			Optional<SkillGroup> optionalSkillGroup = skillGroupRepository.findById(uriLevel0);
+			SkillGroup skillGroup = null;
+			if (optionalSkillGroup.isEmpty()) {
+				optionalSkillGroup = skillGroupRepository.findById(uriLevel1);
+				if (optionalSkillGroup.isEmpty()) {
+					optionalSkillGroup = skillGroupRepository.findById(uriLevel2);
+					if (optionalSkillGroup.isEmpty()) {
+						optionalSkillGroup = skillGroupRepository.findById(uriLevel3);
+						if (optionalSkillGroup.isEmpty()) {
+							logger.info("skip skill group hierarchy:{}", uriLevel3);
+							continue;
+						} else {
+							skillGroup = optionalSkillGroup.get();
+						}
+					} else {
+						skillGroup = optionalSkillGroup.get();
+					}
+				} else {
+					skillGroup = optionalSkillGroup.get();
+				}
+			} else {
+				skillGroup = optionalSkillGroup.get();
+			}
+
+			skillGroup.setLevelDescription(levelGroupDescription);
+			if (!skillGroup.getLevels().containsKey("0")) {
+				Level level0 = new Level();
+				level0.setCode(codeLevel0);
+				level0.setPreferredTerm(preferredTermLevel0);
+				level0.setUri(uriLevel0);
+				skillGroup.getLevels().put("0", level0);
+				skillGroupRepository.save(skillGroup);
+
+			}
+			if (!skillGroup.getLevels().containsKey("1")) {
+				Level level1 = new Level();
+				level1.setCode(codeLevel1);
+				level1.setPreferredTerm(preferredTermLevel1);
+				level1.setUri(uriLevel1);
+				skillGroup.getLevels().put("1", level1);
+				skillGroupRepository.save(skillGroup);
+			}
+			if (!skillGroup.getLevels().containsKey("2")) {
+				Level level2 = new Level();
+				level2.setCode(codeLevel2);
+				level2.setPreferredTerm(preferredTermLevel2);
+				level2.setUri(uriLevel2);
+				skillGroup.getLevels().put("2", level2);
+				skillGroupRepository.save(skillGroup);
+			}
+			if (!skillGroup.getLevels().containsKey("3")) {
+				Level level3 = new Level();
+				level3.setCode(codeLevel3);
+				level3.setPreferredTerm(preferredTermLevel3);
+				level3.setUri(uriLevel3);
+				skillGroup.getLevels().put("3", level3);
+				skillGroupRepository.save(skillGroup);
+			}
+		}
+		csvParser.close();
+		reader.close();
 	}
 
 }

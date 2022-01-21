@@ -1,12 +1,11 @@
 package it.smartcommunitylab.scoengine.connector;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -14,9 +13,14 @@ import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.scoengine.common.Const;
 import it.smartcommunitylab.scoengine.common.HttpUtils;
+import it.smartcommunitylab.scoengine.exception.BadRequestException;
 import it.smartcommunitylab.scoengine.lucene.LuceneManager;
 import it.smartcommunitylab.scoengine.model.TextDoc;
 import it.smartcommunitylab.scoengine.model.esco.EscoResponse;
+import it.smartcommunitylab.scoengine.model.esco.Skill;
+import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
+import it.smartcommunitylab.scoengine.repository.SkillGroupRepository;
+import it.smartcommunitylab.scoengine.repository.SkillRepository;
 
 @Service
 public class ESCOService {
@@ -27,7 +31,11 @@ public class ESCOService {
 	private HttpUtils httpUtils;
 	@Autowired
 	LuceneManager luceneManager;
-	
+	@Autowired
+	private SkillRepository skillRepository;
+	@Autowired
+	private SkillGroupRepository skillGroupRepository;
+
 	public EscoResponse searchOccupation(String text, Pageable pageRequest) throws Exception {
 		EscoResponse searchResult = fetchESCOOccupation(text, pageRequest.getPageSize(), pageRequest.getPageNumber());
 		return searchResult;
@@ -38,20 +46,19 @@ public class ESCOService {
 		try {
 			response = httpUtils.sendGET(apiUrl, text, limit, offset);
 			if (response != null) {
-				
+
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage());
 			throw new Exception(e);
-			
+
 		}
 		return response;
-//		throw new BadRequestException("Not null id");
 	}
 
-	public List<TextDoc> searchSkill(String text, int size) throws Exception {
+	public List<TextDoc> searchSkill(String text, Boolean isTransversal, int size) throws Exception {
 		List<TextDoc> searchList = new ArrayList<>();
-		searchList = luceneManager.searchByFields(text, Const.ESCO_CONCEPT_SKILL, null, size);
+		searchList = luceneManager.searchByFields(text, Const.ESCO_CONCEPT_SKILL, isTransversal, size);
 		return searchList;
 	}
 
@@ -61,10 +68,24 @@ public class ESCOService {
 		return skills;
 	}
 
-	public List<TextDoc> getByUri(String uri, int maxResult) throws Exception {
-		List<TextDoc> results = new ArrayList<TextDoc>();
-		results = luceneManager.searchByURI(uri, maxResult);
-		return results;
+	public Skill getByUri(String uri) throws Exception {
+		Optional<Skill> optional = skillRepository.findById(uri);
+		if (optional.isPresent()) {
+			Skill skill = optional.get();
+			return skill;
+		} else {
+			throw new BadRequestException("No skill with uri present");
+		}
+	}
+	
+	public SkillGroup getSkillGroupByUri(String uri) throws Exception {
+		Optional<SkillGroup> optional = skillGroupRepository.findById(uri);
+		if (optional.isPresent()) {
+			SkillGroup skillGroup = optional.get();
+			return skillGroup;
+		} else {
+			throw new BadRequestException("No skillGroup with uri present");
+		}
 	}
 
 }

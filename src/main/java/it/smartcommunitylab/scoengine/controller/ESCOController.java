@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import it.smartcommunitylab.scoengine.connector.ESCOService;
 import it.smartcommunitylab.scoengine.model.TextDoc;
 import it.smartcommunitylab.scoengine.model.esco.EscoResponse;
+import it.smartcommunitylab.scoengine.model.esco.Skill;
+import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
 
 @RestController
 public class ESCOController implements SCOController {
@@ -23,27 +25,32 @@ public class ESCOController implements SCOController {
 
 	@GetMapping("/api/search/skill")
 	public List<TextDoc> searchSkill(@RequestParam String text, @RequestParam(required = false) String language,
-			@RequestParam int size) throws Exception {
+			@RequestParam(required = false) Boolean isTransversal, @RequestParam int size) throws Exception {
 		text = StringUtils.strip(text);
-		List<TextDoc> result = escoService.searchSkill(text, size);
+		List<TextDoc> result = escoService.searchSkill(text, (isTransversal!=null) ? isTransversal : false, size);
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("/api/search/skill:%s" + " size:%s", text, result.size()));
 		}
 		return result;
 	}
 
+	@GetMapping("/api/skill/uri")
+	public Skill getSkillByUri(@RequestParam String uri) throws Exception {
+		return escoService.getByUri(uri);
+	}
+
+	@GetMapping("/api/skillGroup/uri")
+	public SkillGroup getSkillGroupByUri(@RequestParam String uri) throws Exception {
+		return escoService.getSkillGroupByUri(uri);
+	}
+
 	@GetMapping("/api/field/value")
-	public List<TextDoc> getRowsByFieldValue(@RequestParam String fieldTitle, @RequestParam String fieldValue, @RequestParam String limit) throws Exception {
+	public List<TextDoc> getRowsByFieldValue(@RequestParam String fieldTitle, @RequestParam String fieldValue,
+			@RequestParam String limit) throws Exception {
 		List<TextDoc> result = escoService.getField(fieldTitle, fieldValue, Integer.valueOf(limit));
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("/api/search/uri <%s,%s>", fieldTitle, fieldValue));
 		}
-		return result;
-	}
-	
-	@GetMapping("/api/uri")
-	public List<TextDoc> getByUri(@RequestParam String uri, @RequestParam String limit) throws Exception {
-		List<TextDoc> result = escoService.getByUri(uri, Integer.valueOf(limit));
 		return result;
 	}
 

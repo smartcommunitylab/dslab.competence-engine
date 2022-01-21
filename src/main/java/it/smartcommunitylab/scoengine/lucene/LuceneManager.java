@@ -120,7 +120,7 @@ public class LuceneManager {
 	}
 	
 	public List<TextDoc> searchByFields(String text, String concetType, 
-			String iscoGroup, int maxResult) throws ParseException, IOException {
+			Boolean isTransversal, int maxResult) throws ParseException, IOException {
 		BooleanQuery booleanQuery = null;
 		
 		String[] fields = new String[]{"preferredLabelNormalized", "altLabelsNormalized", "descriptionNormalized"};
@@ -151,9 +151,16 @@ public class LuceneManager {
 			textDoc.getFields().put("description", doc.get("description"));
 			textDoc.getFields().put("hiearchy","");
 			textDoc.getFields().put("reuseLevel", doc.get("reuseLevel"));
+			if (isTransversal) {
+				if (doc.get("reuseLevel").equalsIgnoreCase("transversal")) {
+					result.add(textDoc);
+				} else {
+					continue;
+				}					
+			} 
 			result.add(textDoc);
 		}
-		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), concetType, iscoGroup, text);
+		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), concetType, isTransversal, text);
 		return result;
 	}
 	
