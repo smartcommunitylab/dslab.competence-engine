@@ -126,26 +126,47 @@ public class CsvManager {
 				String relationType = record.get("relationType");
 				Optional<Skill> optionalSkill = skillRepository.findById(relatedSkillUri);
 				if (optionalSkill.isPresent()) {
-					Skill skill = optionalSkill.get();
+					Skill relatedSkill = optionalSkill.get();
 					if ("essential".equals(relationType)) {
-						if (!originalSkill.getIsEssentialSkill().contains(relatedSkillUri)) {
-							originalSkill.getIsEssentialSkill().add(relatedSkillUri);
+						if (!originalSkill.getEssentialSkill().contains(relatedSkillUri)) {
+							originalSkill.getEssentialSkill().add(relatedSkillUri);
 							ResourceLink rLink = new ResourceLink();
-							rLink.setPreferredLabel(skill.getPreferredLabel());
-							rLink.setUri(skill.getUri());
-							rLink.setConceptType(skill.getConceptType());
-							originalSkill.getIsEssentialSkillLink().add(rLink);
+							rLink.setPreferredLabel(relatedSkill.getPreferredLabel());
+							rLink.setUri(relatedSkill.getUri());
+							rLink.setConceptType(relatedSkill.getConceptType());
+							originalSkill.getEssentialSkillLinks().add(rLink);
 							skillRepository.save(originalSkill);
+							// essentialLinkOf
+							if (!relatedSkill.getEssentialSkillOf().contains(originalSkillUri)) {
+								relatedSkill.getEssentialSkillOf().add(originalSkillUri);
+								ResourceLink rLinkOf = new ResourceLink();
+								rLinkOf.setPreferredLabel(originalSkill.getPreferredLabel());
+								rLinkOf.setUri(originalSkill.getUri());
+								rLinkOf.setConceptType(originalSkill.getConceptType());
+								relatedSkill.getEssentialSkillOfLinks().add(rLinkOf);
+								skillRepository.save(relatedSkill);
+							}
+
 						}
 					} else {
-						if (!originalSkill.getIsOptionalSkill().contains(relatedSkillUri)) {
-							originalSkill.getIsOptionalSkill().add(relatedSkillUri);
+						if (!originalSkill.getOptionalSkill().contains(relatedSkillUri)) {
+							originalSkill.getOptionalSkill().add(relatedSkillUri);
 							ResourceLink rLink = new ResourceLink();
-							rLink.setPreferredLabel(skill.getPreferredLabel());
-							rLink.setUri(skill.getUri());
-							rLink.setConceptType(skill.getConceptType());
-							originalSkill.getIsOptionalSkillLink().add(rLink);
+							rLink.setPreferredLabel(relatedSkill.getPreferredLabel());
+							rLink.setUri(relatedSkill.getUri());
+							rLink.setConceptType(relatedSkill.getConceptType());
+							originalSkill.getOptionalSkillLink().add(rLink);
 							skillRepository.save(originalSkill);
+							// optionalLinkOf
+							if (!relatedSkill.getOptionalSkillOf().contains(originalSkillUri)) {
+								relatedSkill.getOptionalSkillOf().add(originalSkillUri);
+								ResourceLink rLinkOf = new ResourceLink();
+								rLinkOf.setPreferredLabel(originalSkill.getPreferredLabel());
+								rLinkOf.setUri(originalSkill.getUri());
+								rLinkOf.setConceptType(originalSkill.getConceptType());
+								relatedSkill.getOptionalSkillOfLink().add(rLinkOf);
+								skillRepository.save(relatedSkill);
+							}
 						}
 					}
 				}

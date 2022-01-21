@@ -14,10 +14,14 @@ public class Skill {
 	private Map<String, String> preferredLabel = new HashMap<>();
 	private Map<String, String> altLabels = new HashMap<>();
 	private Map<String, String> description = new HashMap<>();
-	private List<String> isEssentialSkill = new ArrayList<>();
-	private List<ResourceLink> isEssentialSkillLink = new ArrayList<>();
-	private List<String> isOptionalSkill = new ArrayList<>();
-	private List<ResourceLink> isOptionalSkillLink = new ArrayList<>();
+	private List<String> essentialSkill = new ArrayList<>();
+	private List<ResourceLink> essentialSkillLinks = new ArrayList<>();
+	private List<String> optionalSkill = new ArrayList<>();
+	private List<ResourceLink> optionalSkillLink = new ArrayList<>();
+	private List<String> essentialSkillOf = new ArrayList<>();
+	private List<ResourceLink> essentialSkillOfLinks = new ArrayList<>();
+	private List<String> optionalSkillOf = new ArrayList<>();
+	private List<ResourceLink> optionalSkillOfLink = new ArrayList<>();
 	private List<String> broaderSkill = new ArrayList<>();
 	private List<ResourceLink> broaderSkillLink = new ArrayList<>();
 	private List<String> narrowerSkill = new ArrayList<>();
@@ -112,36 +116,68 @@ public class Skill {
 		this.narrowerSkillLink = narrowerSkillLink;
 	}
 
-	public List<String> getIsEssentialSkill() {
-		return isEssentialSkill;
+	public List<String> getEssentialSkill() {
+		return essentialSkill;
 	}
 
-	public void setIsEssentialSkill(List<String> isEssentialSkill) {
-		this.isEssentialSkill = isEssentialSkill;
+	public void setEssentialSkill(List<String> essentialSkill) {
+		this.essentialSkill = essentialSkill;
 	}
 
-	public List<ResourceLink> getIsEssentialSkillLink() {
-		return isEssentialSkillLink;
+	public List<ResourceLink> getEssentialSkillLinks() {
+		return essentialSkillLinks;
 	}
 
-	public void setIsEssentialSkillLink(List<ResourceLink> isEssentialSkillLink) {
-		this.isEssentialSkillLink = isEssentialSkillLink;
+	public void setEssentialSkillLinks(List<ResourceLink> essentialSkillLinks) {
+		this.essentialSkillLinks = essentialSkillLinks;
 	}
 
-	public List<String> getIsOptionalSkill() {
-		return isOptionalSkill;
+	public List<String> getOptionalSkill() {
+		return optionalSkill;
 	}
 
-	public void setIsOptionalSkill(List<String> isOptionalSkill) {
-		this.isOptionalSkill = isOptionalSkill;
+	public void setOptionalSkill(List<String> optionalSkill) {
+		this.optionalSkill = optionalSkill;
 	}
 
-	public List<ResourceLink> getIsOptionalSkillLink() {
-		return isOptionalSkillLink;
+	public List<ResourceLink> getOptionalSkillLink() {
+		return optionalSkillLink;
 	}
 
-	public void setIsOptionalSkillLink(List<ResourceLink> isOptionalSkillLink) {
-		this.isOptionalSkillLink = isOptionalSkillLink;
+	public void setOptionalSkillLink(List<ResourceLink> optionalSkillLink) {
+		this.optionalSkillLink = optionalSkillLink;
+	}
+
+	public List<String> getEssentialSkillOf() {
+		return essentialSkillOf;
+	}
+
+	public void setEssentialSkillOf(List<String> essentialSkillOf) {
+		this.essentialSkillOf = essentialSkillOf;
+	}
+
+	public List<ResourceLink> getEssentialSkillOfLinks() {
+		return essentialSkillOfLinks;
+	}
+
+	public void setEssentialSkillOfLinks(List<ResourceLink> essentialSkillOfLinks) {
+		this.essentialSkillOfLinks = essentialSkillOfLinks;
+	}
+
+	public List<String> getOptionalSkillOf() {
+		return optionalSkillOf;
+	}
+
+	public void setOptionalSkillOf(List<String> optionalSkillOf) {
+		this.optionalSkillOf = optionalSkillOf;
+	}
+
+	public List<ResourceLink> getOptionalSkillOfLink() {
+		return optionalSkillOfLink;
+	}
+
+	public void setOptionalSkillOfLink(List<ResourceLink> optionalSkillOfLink) {
+		this.optionalSkillOfLink = optionalSkillOfLink;
 	}
 
 }

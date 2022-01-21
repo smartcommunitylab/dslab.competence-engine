@@ -119,7 +119,7 @@ public class LuceneManager {
 		logger.debug("indexDocuments:{}", docs.size());
 	}
 	
-	public List<TextDoc> searchByFields(String text, String concetType, 
+	public List<TextDoc> searchByFields(String text, String conceptType, 
 			Boolean isTransversal, int maxResult) throws ParseException, IOException {
 		BooleanQuery booleanQuery = null;
 		
@@ -132,13 +132,18 @@ public class LuceneManager {
 		Query fieldQuery = parser.parse(QueryParser.escape(normalizeText(text)));
 		
 		SimpleQueryParser simpleParser = new SimpleQueryParser(analyzer, "conceptType");
-		Query typeQuery = simpleParser.parse(concetType);
+		Query typeQuery = simpleParser.parse(conceptType);
 		
-		booleanQuery = new BooleanQuery.Builder()
-					.add(fieldQuery, BooleanClause.Occur.MUST)
-					.add(typeQuery, BooleanClause.Occur.MUST)
-					.build();
-		
+		if (isTransversal) {
+			QueryParser parserReuseLevel = new QueryParser("reuseLevel", analyzer);
+			Query iscoQuery = parserReuseLevel.parse("transversal");
+			booleanQuery = new BooleanQuery.Builder().add(fieldQuery, BooleanClause.Occur.MUST)
+					.add(typeQuery, BooleanClause.Occur.MUST).add(iscoQuery, BooleanClause.Occur.MUST).build();
+		} else {
+			booleanQuery = new BooleanQuery.Builder().add(fieldQuery, BooleanClause.Occur.MUST)
+					.add(typeQuery, BooleanClause.Occur.MUST).build();
+		}
+				
 		ScoreDoc[] hits = isearcher.search(booleanQuery, maxResult).scoreDocs;
 		List<TextDoc> result = new ArrayList<TextDoc>();
 		for(ScoreDoc scoreDoc : hits) {
@@ -149,18 +154,10 @@ public class LuceneManager {
 			textDoc.getFields().put("type", doc.get("conceptType"));
 			textDoc.getFields().put("uri", doc.get("uri"));
 			textDoc.getFields().put("description", doc.get("description"));
-			textDoc.getFields().put("hiearchy","");
 			textDoc.getFields().put("reuseLevel", doc.get("reuseLevel"));
-			if (isTransversal) {
-				if (doc.get("reuseLevel").equalsIgnoreCase("transversal")) {
-					result.add(textDoc);
-				} else {
-					continue;
-				}					
-			} 
 			result.add(textDoc);
 		}
-		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), concetType, isTransversal, text);
+		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), conceptType, isTransversal, text);
 		return result;
 	}
 	
@@ -184,8 +181,13 @@ public class LuceneManager {
 	}
 	
 	public List<TextDoc> searchByURI(String url, int maxResult) throws IOException, ParseException {		
-		TermQuery tq= new TermQuery(new Term(Const.ESCO_STORE_URI, url));
-		BooleanQuery bq = new BooleanQuery.Builder().add(tq, BooleanClause.Occur.SHOULD).build();		
+		SimpleQueryParser simpleParser = new SimpleQueryParser(analyzer, "conceptType");
+		Query typeQuery = simpleParser.parse(Const.ESCO_CONCEPT_SKILL);
+		QueryParser parserUrl = new QueryParser("conceptUri", analyzer);
+		Query urlQuery = parserUrl.parse(url);
+		BooleanQuery bq = new BooleanQuery.Builder().add(urlQuery, BooleanClause.Occur.MUST)
+				.add(typeQuery, BooleanClause.Occur.MUST).add(urlQuery, BooleanClause.Occur.MUST).build();
+			
 		ScoreDoc[] hits = isearcher.search(bq, maxResult).scoreDocs;
 		List<TextDoc> result = new ArrayList<TextDoc>();
 		for(ScoreDoc scoreDoc : hits) {

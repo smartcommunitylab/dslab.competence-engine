@@ -54,6 +54,13 @@ public class ESCOController implements SCOController {
 		return result;
 	}
 
+	@GetMapping("/api/lucene/skill/uri")
+	public List<TextDoc> getTextDocByUri(@RequestParam String url,
+			@RequestParam String limit) throws Exception {
+		List<TextDoc> result = escoService.getByUri(url, Integer.valueOf(limit));
+		return result;
+	}
+	
 	@GetMapping("/api/search/occupation")
 	public EscoResponse searchOccupation(@RequestParam String text, Pageable pageRequest) throws Exception {
 		EscoResponse result = escoService.searchOccupation(text, pageRequest);

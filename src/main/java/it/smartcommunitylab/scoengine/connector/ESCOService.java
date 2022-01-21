@@ -59,6 +59,13 @@ public class ESCOService {
 	public List<TextDoc> searchSkill(String text, Boolean isTransversal, int size) throws Exception {
 		List<TextDoc> searchList = new ArrayList<>();
 		searchList = luceneManager.searchByFields(text, Const.ESCO_CONCEPT_SKILL, isTransversal, size);
+		for (TextDoc tDoc: searchList) {
+			Optional<Skill> optional = skillRepository.findById(tDoc.getFields().get("uri"));
+			if (optional.isPresent()) {
+				Skill skill = optional.get();
+				tDoc.getHiearchy().addAll(skill.getBroaderSkillLink());
+			} 
+		}
 		return searchList;
 	}
 
@@ -68,6 +75,12 @@ public class ESCOService {
 		return skills;
 	}
 
+	public List<TextDoc> getByUri(String url, int maxSize) throws Exception {
+		List<TextDoc> skills = new ArrayList<TextDoc>();
+		skills = luceneManager.searchByURI(url, maxSize);
+		return skills;
+	}
+	
 	public Skill getByUri(String uri) throws Exception {
 		Optional<Skill> optional = skillRepository.findById(uri);
 		if (optional.isPresent()) {
