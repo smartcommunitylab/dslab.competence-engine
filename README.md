@@ -13,27 +13,20 @@ In order to import dataset for manipulation and indexing, one need to call the f
 
 The API expects a parameter 'path' which corresponds to location of dataset csv files
 
-## Search Query
-
-The API execpt 'text' parameter as input search key and 'size' parameter determine the number of skills to search.
-
+## Search Skill
 @GetMapping("/api/search/skill")
-	@RequestParam String text,
-	@RequestParam String language,
-	@RequestParam String size)
+@RequestParam String text,
+@RequestParam(required = false) String language,
+@RequestParam(required = false) Boolean isTransversal,
+@RequestParam int size
 
-[
-    {
-        "fields": {
-            "hiearchy": "",
-            "description": "",
-            "label": "",
-            "type": "",
-            "uri": ""
-        },
-        "score": 0
-    }..
-]
+## Get Skill
+@GetMapping("/api/skill/uri")
+@RequestParam String uri
+
+## Get Skill Group
+@GetMapping("/api/skillGroup/uri")
+@RequestParam String uri
 
 Sample Url: http://localhost:4500/sco/api/search/skill?text=javascript&size=10
 
