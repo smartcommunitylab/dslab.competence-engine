@@ -28,7 +28,5 @@ The API expects a parameter 'path' which corresponds to location of dataset csv 
 @GetMapping("/api/skillGroup/uri")
 @RequestParam String uri
 
-Sample Url: http://localhost:4500/sco/api/search/skill?text=javascript&size=10
-
 ## Swagger
 http://localhost:4500/sco/swagger-ui.html#/esco-controller
