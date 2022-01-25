@@ -10,7 +10,7 @@ public class SkillSearchStub {
 	private String conceptType;
 	private String reuseLevel;
 	private Map<String, String> preferredLabel = new HashMap<>();
-	private List<ResourceLink> hiearchy = new ArrayList<>();
+	private List<ResourceLink> hierarchy = new ArrayList<>();
 
 	public String getUri() {
 		return uri;
@@ -44,12 +44,12 @@ public class SkillSearchStub {
 		this.preferredLabel = preferredLabel;
 	}
 
-	public List<ResourceLink> getHiearchy() {
-		return hiearchy;
+	public List<ResourceLink> getHierarchy() {
+		return hierarchy;
 	}
 
-	public void setHiearchy(List<ResourceLink> hiearchy) {
-		this.hiearchy = hiearchy;
+	public void setHierarchy(List<ResourceLink> hierarchy) {
+		this.hierarchy = hierarchy;
 	}
 
 }
