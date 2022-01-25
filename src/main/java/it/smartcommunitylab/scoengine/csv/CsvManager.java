@@ -63,7 +63,6 @@ public class CsvManager {
 					TextField.TYPE_STORED));
 			doc.add(new Field("descriptionNormalized", luceneManager.normalizeText(record.get("description")),
 					TextField.TYPE_STORED));
-
 			docs.add(doc);
 		}
 		if (docs.size() > 0) {
@@ -71,7 +70,7 @@ public class CsvManager {
 		}
 		csvParser.close();
 		reader.close();
-		logger.info("indexSkills:{}", docs.size());
+		logger.info("indexSkills:{}", docs.size());		
 	}
 
 	public List<TextDoc> getByUri(String field, String fieldTitle, int maxResult) throws Exception {
@@ -91,12 +90,14 @@ public class CsvManager {
 			String preferredLabel = record.get("preferredLabel");
 			String altLabels = record.get("altLabels");
 			String description = record.get("description");
+			String reuseLevel = record.get("reuseLevel");
 			Skill skill = null;
 			Optional<Skill> optionalSkill = skillRepository.findById(uri);
 			if (optionalSkill.isEmpty()) {
 				skill = new Skill();
 				skill.setUri(uri);
 				skill.setConceptType(conceptType);
+				skill.setReuseLevel(reuseLevel);
 			} else {
 				skill = optionalSkill.get();
 			}
@@ -196,11 +197,16 @@ public class CsvManager {
 			if (broaderType.equals(Const.ESCO_CONCEPT_SKILL_GROUP)) {
 				if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
 					skill.getBroaderSkill().add(broaderSkillUri);
-					ResourceLink rLink = new ResourceLink();
-					rLink.setUri(broaderSkillUri);
-					rLink.setConceptType(broaderType);
-					skill.getBroaderSkillLink().add(rLink);
-					skillRepository.save(skill);
+					Optional<SkillGroup> skillGroupOptional = skillGroupRepository.findById(broaderSkillUri);
+					if(!skillGroupOptional.isEmpty()) {
+						SkillGroup skillGroup = skillGroupOptional.get();
+						ResourceLink rLink = new ResourceLink();
+						rLink.setUri(broaderSkillUri);
+						rLink.setConceptType(broaderType);
+						rLink.setPreferredLabel(skillGroup.getPreferredLabel());
+						skill.getBroaderSkillLink().add(rLink);
+						skillRepository.save(skill);	
+					}					
 				}
 				continue;
 			}

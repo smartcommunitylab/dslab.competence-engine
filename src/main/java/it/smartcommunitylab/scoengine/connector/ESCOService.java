@@ -19,6 +19,7 @@ import it.smartcommunitylab.scoengine.model.TextDoc;
 import it.smartcommunitylab.scoengine.model.esco.EscoResponse;
 import it.smartcommunitylab.scoengine.model.esco.Skill;
 import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
+import it.smartcommunitylab.scoengine.model.esco.SkillSearchStub;
 import it.smartcommunitylab.scoengine.repository.SkillGroupRepository;
 import it.smartcommunitylab.scoengine.repository.SkillRepository;
 
@@ -56,17 +57,26 @@ public class ESCOService {
 		return response;
 	}
 
-	public List<TextDoc> searchSkill(String text, Boolean isTransversal, int size) throws Exception {
-		List<TextDoc> searchList = new ArrayList<>();
-		searchList = luceneManager.searchByFields(text, Const.ESCO_CONCEPT_SKILL, isTransversal, size);
-		for (TextDoc tDoc: searchList) {
-			Optional<Skill> optional = skillRepository.findById(tDoc.getFields().get("uri"));
-			if (optional.isPresent()) {
-				Skill skill = optional.get();
-				tDoc.getHiearchy().addAll(skill.getBroaderSkillLink());
-			} 
+	public List<SkillSearchStub> searchSkill(String text, Boolean isTransversal, int size) throws Exception {
+		List<SkillSearchStub> result = new ArrayList<>();
+		List<String> uris = new ArrayList<>();
+		uris = luceneManager.searchIdsByFields(text, Const.ESCO_CONCEPT_SKILL, isTransversal, size);
+		List<Skill> searchList = new ArrayList<>();
+		if (isTransversal) {
+			searchList = skillRepository.findSkill(uris, true);
+		} else {
+			searchList = skillRepository.findSkill(uris, false);
 		}
-		return searchList;
+		for (Skill sk : searchList) {
+			SkillSearchStub sst = new SkillSearchStub();
+			sst.setConceptType(sk.getConceptType());
+			sst.setUri(sk.getUri());
+			sst.setPreferredLabel(sk.getPreferredLabel());
+			sst.setReuseLevel(sk.getReuseLevel());
+			sst.setHiearchy(sk.getBroaderSkillLink());
+			result.add(sst);
+		}
+		return result;
 	}
 
 	public List<TextDoc> getField(String fieldTitle, String fieldValue, int maxSize) throws Exception {
@@ -80,7 +90,7 @@ public class ESCOService {
 		skills = luceneManager.searchByURI(url, maxSize);
 		return skills;
 	}
-	
+
 	public Skill getByUri(String uri) throws Exception {
 		Optional<Skill> optional = skillRepository.findById(uri);
 		if (optional.isPresent()) {
@@ -90,7 +100,7 @@ public class ESCOService {
 			throw new BadRequestException("No skill with uri present");
 		}
 	}
-	
+
 	public SkillGroup getSkillGroupByUri(String uri) throws Exception {
 		Optional<SkillGroup> optional = skillGroupRepository.findById(uri);
 		if (optional.isPresent()) {

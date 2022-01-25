@@ -16,6 +16,7 @@ import it.smartcommunitylab.scoengine.model.TextDoc;
 import it.smartcommunitylab.scoengine.model.esco.EscoResponse;
 import it.smartcommunitylab.scoengine.model.esco.Skill;
 import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
+import it.smartcommunitylab.scoengine.model.esco.SkillSearchStub;
 
 @RestController
 public class ESCOController implements SCOController {
@@ -24,12 +25,14 @@ public class ESCOController implements SCOController {
 	private ESCOService escoService;
 
 	@GetMapping("/api/search/skill")
-	public List<TextDoc> searchSkill(@RequestParam String text, @RequestParam(required = false) String language,
+	public List<SkillSearchStub> searchSkill(@RequestParam String text, @RequestParam(required = false) String language,
 			@RequestParam(required = false) Boolean isTransversal, @RequestParam int size) throws Exception {
 		text = StringUtils.strip(text);
-		List<TextDoc> result = escoService.searchSkill(text, (isTransversal!=null) ? isTransversal : false, size);
+		List<SkillSearchStub> result = escoService.searchSkill(text, (isTransversal != null) ? isTransversal : false,
+				size);
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("/api/search/skill:%s" + " size:%s", text, result.size()));
+			logger.info(String.format("/api/search/skill:%s" + " size:%s" + "isTransversal:%s", text, isTransversal,
+					result.size()));
 		}
 		return result;
 	}
@@ -55,12 +58,11 @@ public class ESCOController implements SCOController {
 	}
 
 	@GetMapping("/api/lucene/skill/uri")
-	public List<TextDoc> getTextDocByUri(@RequestParam String url,
-			@RequestParam String limit) throws Exception {
+	public List<TextDoc> getTextDocByUri(@RequestParam String url, @RequestParam String limit) throws Exception {
 		List<TextDoc> result = escoService.getByUri(url, Integer.valueOf(limit));
 		return result;
 	}
-	
+
 	@GetMapping("/api/search/occupation")
 	public EscoResponse searchOccupation(@RequestParam String text, Pageable pageRequest) throws Exception {
 		EscoResponse result = escoService.searchOccupation(text, pageRequest);

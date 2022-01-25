@@ -11,6 +11,7 @@ public class Skill {
 	@Id
 	private String uri;
 	private String conceptType;
+	private String reuseLevel;
 	private Map<String, String> preferredLabel = new HashMap<>();
 	private Map<String, String> altLabels = new HashMap<>();
 	private Map<String, String> description = new HashMap<>();
@@ -58,6 +59,14 @@ public class Skill {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	public String getReuseLevel() {
+		return reuseLevel;
+	}
+
+	public void setReuseLevel(String reuseLevel) {
+		this.reuseLevel = reuseLevel;
 	}
 
 	public List<String> getBroaderSkill() {

@@ -9,4 +9,5 @@ public class Const {
 	public static final String ESCO_CONCEPT_OCCCUPATION = "Occupation";
 	public static final String ESCO_CONCEPT_ISCO_GROUP = "ISCOGroup";
 	public static final String ESCO_STORE_URI = "uri";
+	public static final String ESCO_TRANSVERSAL_SKILL = "transversal";
 }

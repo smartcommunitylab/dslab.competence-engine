@@ -76,7 +76,6 @@ public class LuceneManager {
 	    pipeline.loadDefaultProperties();
 	    pipeline.setProperty("annotators", "ita_toksent, pos, ita_morpho, ita_lemma");
 	    pipeline.load();
-
 	}
 
 	@PreDestroy
@@ -154,6 +153,40 @@ public class LuceneManager {
 			textDoc.getFields().put("description", doc.get("description"));
 			textDoc.getFields().put("reuseLevel", doc.get("reuseLevel"));
 			result.add(textDoc);
+		}
+		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), conceptType, isTransversal, text);
+		return result;
+	}
+	
+	public List<String> searchIdsByFields(String text, String conceptType, 
+			Boolean isTransversal, int maxResult) throws ParseException, IOException {
+		BooleanQuery booleanQuery = null;
+		
+		String[] fields = new String[]{"preferredLabelNormalized", "altLabelsNormalized", "descriptionNormalized"};
+		Map<String, Float> boosts = new HashMap<String, Float>();
+		boosts.put("descriptionNormalized", Float.valueOf(1.05f));
+		boosts.put("preferredLabelNormalized", Float.valueOf(1.05f));
+		boosts.put("altLabelsNormalized", Float.valueOf(0.90f));
+		QueryParser parser = new MultiFieldQueryParser(fields, analyzer, boosts);
+		Query fieldQuery = parser.parse(QueryParser.escape(normalizeText(text)));
+		if (isTransversal) {
+			QueryParser parserReuseLevel = new QueryParser("reuseLevel", analyzer);
+			Query reuseLevelQuery = parserReuseLevel.parse("transversal");
+			booleanQuery = new BooleanQuery.Builder()
+					.add(fieldQuery, BooleanClause.Occur.MUST)
+					.add(reuseLevelQuery, BooleanClause.Occur.MUST)
+					.build();
+		} else {
+			booleanQuery = new BooleanQuery.Builder()
+					.add(fieldQuery, BooleanClause.Occur.MUST)
+					.build();
+		}
+			
+		ScoreDoc[] hits = isearcher.search(booleanQuery, maxResult).scoreDocs;
+		List<String> result = new ArrayList<String>();
+		for(ScoreDoc scoreDoc : hits) {
+			Document doc = isearcher.doc(scoreDoc.doc);
+			result.add(doc.get("uri"));
 		}
 		logger.debug("searchByFields:{}/{}/{}/{}", result.size(), conceptType, isTransversal, text);
 		return result;

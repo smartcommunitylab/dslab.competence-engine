@@ -3,13 +3,11 @@ package it.smartcommunitylab.scoengine.repository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import it.smartcommunitylab.scoengine.common.Const;
 import it.smartcommunitylab.scoengine.model.esco.Skill;
 
 public class SkillRepositoryCustomImpl implements SkillRepositoryCustom {
@@ -17,21 +15,17 @@ public class SkillRepositoryCustomImpl implements SkillRepositoryCustom {
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public List<Skill> findSkill(boolean skillGroup, List<String> isEssentialForOccupation,
-			List<String> isOptionalForOccupation, Pageable pageable) {
-//		Criteria criteria = skillGroup ? Criteria.where("conceptType").is(Const.CONCEPT_SKILL_GROUP) :
-//			Criteria.where("conceptType").is(Const.CONCEPT_SKILL);
-//		if((isEssentialForOccupation != null) && (isEssentialForOccupation.size() > 0)) {
-//			criteria = criteria.and("isEssentialForOccupation").in(isEssentialForOccupation);
-//		}
-//		if((isOptionalForOccupation != null) && (isOptionalForOccupation.size() > 0)) {
-//			criteria = criteria.and("isOptionalForOccupation").in(isOptionalForOccupation);
-//		}
-		Query query = new Query();//criteria
-//		query.with(new Sort(Direction.ASC, "preferredLabel.it"));
-//		if(pageable != null) {
-//			query.with(pageable);
-//		}
+	public List<Skill> findSkill(List<String> ids, Boolean isTransversal) {
+		Criteria criteria = Criteria.where("uri").in(ids);
+		if (isTransversal) {
+			criteria = criteria.and("reuseLevel").is(Const.ESCO_TRANSVERSAL_SKILL);
+		}
+		Query query = new Query(criteria);
+		query.fields().include("uri");
+		query.fields().include("conceptType");
+		query.fields().include("reuseLevel");
+		query.fields().include("preferredLabel");
+		query.fields().include("broaderSkillLink");
 		return mongoTemplate.find(query, Skill.class);
 	}
 
