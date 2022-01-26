@@ -70,7 +70,7 @@ public class CsvManager {
 		}
 		csvParser.close();
 		reader.close();
-		logger.info("indexSkills:{}", docs.size());		
+		logger.info("indexSkills:{}", docs.size());
 	}
 
 	public List<TextDoc> getByUri(String field, String fieldTitle, int maxResult) throws Exception {
@@ -184,54 +184,108 @@ public class CsvManager {
 				.withSkipHeaderRecord();
 		CSVParser csvParser = new CSVParser(reader, csvFormat);
 		for (CSVRecord record : csvParser) {
-			String skillUri = record.get("conceptUri");
-			String broaderSkillUri = record.get("broaderUri");
-			String broaderType = record.get("broaderType");
-			Optional<Skill> optionalSkill = skillRepository.findById(skillUri);
-			Optional<Skill> optionalBroaderSkill = skillRepository.findById(broaderSkillUri);
-			if (optionalSkill.isEmpty()) {
-				logger.info("skip skill relation:{} / {}", skillUri, broaderSkillUri);
-				continue;
-			}
-			Skill skill = optionalSkill.get();
-			if (broaderType.equals(Const.ESCO_CONCEPT_SKILL_GROUP)) {
-				if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
-					skill.getBroaderSkill().add(broaderSkillUri);
-					Optional<SkillGroup> skillGroupOptional = skillGroupRepository.findById(broaderSkillUri);
-					if(!skillGroupOptional.isEmpty()) {
-						SkillGroup skillGroup = skillGroupOptional.get();
-						ResourceLink rLink = new ResourceLink();
-						rLink.setUri(broaderSkillUri);
-						rLink.setConceptType(broaderType);
-						rLink.setPreferredLabel(skillGroup.getPreferredLabel());
-						skill.getBroaderSkillLink().add(rLink);
-						skillRepository.save(skill);	
-					}					
-				}
-				continue;
-			}
-			Skill broaderSkill = optionalBroaderSkill.get();
-			if (!optionalBroaderSkill.isEmpty()) {
-				if (!skill.getBroaderSkill().contains(broaderSkillUri)) {
-					skill.getBroaderSkill().add(broaderSkillUri);
-					ResourceLink rLink = new ResourceLink();
-					rLink.setPreferredLabel(broaderSkill.getPreferredLabel());
-					rLink.setUri(broaderSkill.getUri());
-					rLink.setConceptType(broaderSkill.getConceptType());
-					skill.getBroaderSkillLink().add(rLink);
-					skillRepository.save(skill);
-				}
-				if (!broaderSkill.getNarrowerSkill().contains(skillUri)) {
-					broaderSkill.getNarrowerSkill().add(skillUri);
-					ResourceLink rLink = new ResourceLink();
-					rLink.setPreferredLabel(skill.getPreferredLabel());
-					rLink.setUri(skill.getUri());
-					rLink.setConceptType(skill.getConceptType());
-					broaderSkill.getNarrowerSkillLink().add(rLink);
-					skillRepository.save(broaderSkill);
-				}
+			String conceptType = record.get("conceptType");
+			String conceptUri = record.get("conceptUri");
+			String broaderConceptType = record.get("broaderType");
+			String broaderConceptUri = record.get("broaderUri");
 
-				logger.info("importSkillParentChildRelations:{}/{}", skillUri, broaderSkillUri);
+			if (conceptType.equals(Const.ESCO_CONCEPT_SKILL_GROUP)) {
+				// SkillGroup, SkillGroup
+				Optional<SkillGroup> conceptSkillGroupOptional = skillGroupRepository.findById(conceptUri);
+				if (!conceptSkillGroupOptional.isEmpty()) {
+					SkillGroup conceptSkillGroup = conceptSkillGroupOptional.get();
+					Optional<SkillGroup> broaderSkillGroupOptional = skillGroupRepository.findById(broaderConceptUri);
+					if (!broaderSkillGroupOptional.isEmpty()) {
+						SkillGroup broaderSkillGroup = broaderSkillGroupOptional.get();
+						if (!conceptSkillGroup.getBroaderSkill().contains(broaderConceptUri)) {
+							conceptSkillGroup.getBroaderSkill().add(broaderConceptUri);
+							ResourceLink rLinkGroup = new ResourceLink();
+							rLinkGroup.setPreferredLabel(broaderSkillGroup.getPreferredLabel());
+							rLinkGroup.setUri(broaderSkillGroup.getUri());
+							rLinkGroup.setConceptType(broaderSkillGroup.getConceptType());
+							conceptSkillGroup.getBroaderSkillLink().add(rLinkGroup);
+							skillGroupRepository.save(conceptSkillGroup);
+						}
+						if (!broaderSkillGroup.getNarrowerSkill().contains(conceptUri)) {
+							broaderSkillGroup.getNarrowerSkill().add(conceptUri);
+							ResourceLink rLinkGroup = new ResourceLink();
+							rLinkGroup.setPreferredLabel(conceptSkillGroup.getPreferredLabel());
+							rLinkGroup.setUri(conceptSkillGroup.getUri());
+							rLinkGroup.setConceptType(conceptSkillGroup.getConceptType());
+							broaderSkillGroup.getNarrowerSkillLink().add(rLinkGroup);
+							skillGroupRepository.save(broaderSkillGroup);
+						}
+						logger.info("Import SkillGroup-SkillGroup broader relation:{}/{}", conceptUri,
+								broaderConceptUri);
+					}
+				} else {
+					logger.info("Skipping SkillGroup-SkillGroup broader relation:{}/{}", conceptUri, broaderConceptUri);
+				}
+			} else if (conceptType.equals(Const.ESCO_CONCEPT_SKILL)
+					&& broaderConceptType.equals(Const.ESCO_CONCEPT_SKILL_GROUP)) {
+				// Skill, SkillGroup
+				Optional<Skill> optionalSkill = skillRepository.findById(conceptUri);
+				if (!optionalSkill.isEmpty()) {
+					Skill skill = optionalSkill.get();
+					if (!skill.getBroaderSkill().contains(broaderConceptUri)) {
+						skill.getBroaderSkill().add(broaderConceptUri);
+						Optional<SkillGroup> skillGroupOptional = skillGroupRepository.findById(broaderConceptUri);
+						if (!skillGroupOptional.isEmpty()) {
+							SkillGroup skillGroup = skillGroupOptional.get();
+							ResourceLink rLink = new ResourceLink();
+							rLink.setUri(broaderConceptUri);
+							rLink.setConceptType(broaderConceptType);
+							rLink.setPreferredLabel(skillGroup.getPreferredLabel());
+							skill.getBroaderSkillLink().add(rLink);
+							skillRepository.save(skill);
+							if (!skillGroup.getNarrowerSkill().contains(conceptUri)) {
+								skillGroup.getNarrowerSkill().add(conceptUri);
+								ResourceLink rLinkGroup = new ResourceLink();
+								rLinkGroup.setUri(conceptUri);
+								rLinkGroup.setConceptType(skill.getConceptType());
+								rLinkGroup.setPreferredLabel(skill.getPreferredLabel());
+								skillGroup.getNarrowerSkillLink().add(rLinkGroup);
+								skillGroupRepository.save(skillGroup);
+							}
+							logger.info("Import Skill-SkillGroup broader relation:{}/{}", conceptUri,
+									broaderConceptUri);
+						}
+					}
+				} else {
+					logger.info("Skipping Skill-SkillGroup broader relation:{}/{}", conceptUri, broaderConceptUri);
+				}
+			} else if (conceptType.equals(Const.ESCO_CONCEPT_SKILL)
+					&& broaderConceptType.equals(Const.ESCO_CONCEPT_SKILL)) {
+				// Skill, Skill
+				Optional<Skill> optionalSkill = skillRepository.findById(conceptUri);
+				Skill skill = optionalSkill.get();
+				if (!optionalSkill.isEmpty()) {
+					Optional<Skill> optionalBroaderSkill = skillRepository.findById(broaderConceptUri);
+					Skill broaderSkill = optionalBroaderSkill.get();
+					if (!optionalBroaderSkill.isEmpty()) {
+						if (!skill.getBroaderSkill().contains(broaderConceptUri)) {
+							skill.getBroaderSkill().add(broaderConceptUri);
+							ResourceLink rLink = new ResourceLink();
+							rLink.setPreferredLabel(broaderSkill.getPreferredLabel());
+							rLink.setUri(broaderSkill.getUri());
+							rLink.setConceptType(broaderSkill.getConceptType());
+							skill.getBroaderSkillLink().add(rLink);
+							skillRepository.save(skill);
+						}
+						if (!broaderSkill.getNarrowerSkill().contains(conceptUri)) {
+							broaderSkill.getNarrowerSkill().add(conceptUri);
+							ResourceLink rLink = new ResourceLink();
+							rLink.setPreferredLabel(skill.getPreferredLabel());
+							rLink.setUri(skill.getUri());
+							rLink.setConceptType(skill.getConceptType());
+							broaderSkill.getNarrowerSkillLink().add(rLink);
+							skillRepository.save(broaderSkill);
+						}
+						logger.info("import Skill-Skill broader relation:{}/{}", conceptUri, broaderConceptUri);
+					}
+				} else {
+					logger.info("Skipping Skill-Skill broader relation:{}/{}", conceptUri, broaderConceptUri);
+				}
 			}
 		}
 		csvParser.close();

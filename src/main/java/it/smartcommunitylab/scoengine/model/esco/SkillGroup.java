@@ -1,6 +1,8 @@
 package it.smartcommunitylab.scoengine.model.esco;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -15,6 +17,10 @@ public class SkillGroup {
 	private String code;
 	private Map<String, Level> levels = new HashMap<>();
 	private String levelDescription;
+	private List<String> broaderSkill = new ArrayList<>();
+	private List<ResourceLink> broaderSkillLink = new ArrayList<>();
+	private List<String> narrowerSkill = new ArrayList<>();
+	private List<ResourceLink> narrowerSkillLink = new ArrayList<>();
 
 	public String getUri() {
 		return uri;
@@ -78,6 +84,38 @@ public class SkillGroup {
 
 	public void setLevelDescription(String levelDescription) {
 		this.levelDescription = levelDescription;
+	}
+
+	public List<String> getBroaderSkill() {
+		return broaderSkill;
+	}
+
+	public void setBroaderSkill(List<String> broaderSkill) {
+		this.broaderSkill = broaderSkill;
+	}
+
+	public List<ResourceLink> getBroaderSkillLink() {
+		return broaderSkillLink;
+	}
+
+	public void setBroaderSkillLink(List<ResourceLink> broaderSkillLink) {
+		this.broaderSkillLink = broaderSkillLink;
+	}
+
+	public List<String> getNarrowerSkill() {
+		return narrowerSkill;
+	}
+
+	public void setNarrowerSkill(List<String> narrowerSkill) {
+		this.narrowerSkill = narrowerSkill;
+	}
+
+	public List<ResourceLink> getNarrowerSkillLink() {
+		return narrowerSkillLink;
+	}
+
+	public void setNarrowerSkillLink(List<ResourceLink> narrowerSkillLink) {
+		this.narrowerSkillLink = narrowerSkillLink;
 	}
 
 }

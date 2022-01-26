@@ -28,9 +28,6 @@ public class AdminController implements SCOController {
 		csvManager.importSkillGroups(path + "/skillGroups_it.csv", "it");
 		csvManager.importSkillEssentialRelations(path + "/skillSkillRelations.csv");
 		csvManager.importSkillBroaderRelation(path + "/broaderRelationsSkillPillar.csv");
-//		csvManager.importOccupations(path + "/occupations_it.csv", "it");
-//		csvManager.importOccupationSkillRelations(path + "/occupationSkillRelations.csv");
-//		
 		logger.info("importAll:{}", path);
 	}
 

@@ -11,11 +11,11 @@ to query and navigate skill, competence, occupation ontology data.
 Engine for query and navigate ESCO ontology data
 
 ## Search Skill
-@GetMapping("/api/search/skill")
-@RequestParam String text,
-@RequestParam(required = false) String language,
-@RequestParam(required = false) Boolean isTransversal,
-@RequestParam int size
+	@GetMapping("/api/search/skill")
+	@RequestParam String text,
+	@RequestParam(required = false) String language,
+	@RequestParam(required = false) Boolean isTransversal,
+	@RequestParam int size
 
 ## Get Skill
 	@GetMapping("/api/skill/uri")
@@ -35,7 +35,9 @@ Engine for query and navigate ESCO ontology data
 ## Run
 	java -jar competence-engine-1.0.jar --lucene.index.path=/path/to/esco/csv
 
-Note: The current version is based on ESCO model v1.0.9. One can download the following set of files from
+By default, the engine starts on port 4500. The port can be changed by specifying --server.port parameter during launch.
+Note:
+The current version is based on ESCO model v1.0.9. One can download the following set of files from
 	https://ec.europa.eu/esco/portal/download
 
 Select version v1.0.9, type CSV. The files used for SCO Engine are skills_it.csv, skillGroups_it.csv, skillSkillRelations.csv,
