@@ -18,25 +18,25 @@ Engine for query and navigate ESCO ontology data
 @RequestParam int size
 
 ## Get Skill
-@GetMapping("/api/skill/uri")
-@RequestParam String uri
+	@GetMapping("/api/skill/uri")
+	@RequestParam String uri
 
 ## Get Skill Group
-@GetMapping("/api/skillGroup/uri")
-@RequestParam String uri
+	@GetMapping("/api/skillGroup/uri")
+	@RequestParam String uri
 
 ## Swagger
 	http://localhost:4500/sco/swagger-ui.html#/esco-controller
 
 
 ## Build
-mvn clean package -Dmaven.test.skip=true
+	mvn clean package -Dmaven.test.skip=true
 
 ## Run
 	java -jar competence-engine-1.0.jar --lucene.index.path=/path/to/esco/csv
 
 Note: The current version is based on ESCO model v1.0.9. One can download the following set of files from
-https://ec.europa.eu/esco/portal/download
+	https://ec.europa.eu/esco/portal/download
 
 Select version v1.0.9, type CSV. The files used for SCO Engine are skills_it.csv, skillGroups_it.csv, skillSkillRelations.csv,
 broaderRelationsSkillPillar.csv
