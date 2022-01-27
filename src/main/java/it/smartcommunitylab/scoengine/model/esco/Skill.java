@@ -27,6 +27,7 @@ public class Skill {
 	private List<ResourceLink> broaderSkillLink = new ArrayList<>();
 	private List<String> narrowerSkill = new ArrayList<>();
 	private List<ResourceLink> narrowerSkillLink = new ArrayList<>();
+	private List<String> inScheme = new ArrayList<>();
 
 	@Override
 	public boolean equals(Object obj) {
@@ -187,6 +188,14 @@ public class Skill {
 
 	public void setOptionalSkillOfLink(List<ResourceLink> optionalSkillOfLink) {
 		this.optionalSkillOfLink = optionalSkillOfLink;
+	}
+
+	public List<String> getInScheme() {
+		return inScheme;
+	}
+
+	public void setInScheme(List<String> inScheme) {
+		this.inScheme = inScheme;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,6 +64,9 @@ public class CsvManager {
 					TextField.TYPE_STORED));
 			doc.add(new Field("descriptionNormalized", luceneManager.normalizeText(record.get("description")),
 					TextField.TYPE_STORED));
+			for (String inScheme: record.get("inScheme").split(",")) {
+				doc.add(new Field("inScheme", inScheme.trim(), TextField.TYPE_STORED));
+			}
 			docs.add(doc);
 		}
 		if (docs.size() > 0) {
@@ -104,6 +108,11 @@ public class CsvManager {
 			skill.getPreferredLabel().put(lang, preferredLabel);
 			skill.getAltLabels().put(lang, altLabels);
 			skill.getDescription().put(lang, description);
+			for (String inScheme: record.get("inScheme").split(",")) {
+				if(!skill.getInScheme().contains(inScheme.trim())) {
+					skill.getInScheme().add(inScheme.trim());
+				}
+			}
 			skillRepository.save(skill);
 			logger.info("importSkills:{}/{}", lang, uri);
 		}

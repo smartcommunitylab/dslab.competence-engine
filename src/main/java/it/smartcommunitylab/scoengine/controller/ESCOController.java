@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.scoengine.connector.ESCOService;
+import it.smartcommunitylab.scoengine.model.TextDoc;
 import it.smartcommunitylab.scoengine.model.esco.Skill;
 import it.smartcommunitylab.scoengine.model.esco.SkillGroup;
 import it.smartcommunitylab.scoengine.model.esco.SkillSearchStub;
@@ -25,10 +26,9 @@ public class ESCOController implements SCOController {
 	public List<SkillSearchStub> searchSkill(@RequestParam String text, @RequestParam(required = false) String language,
 			@RequestParam(required = false) Boolean isTransversal, @RequestParam int size) throws Exception {
 		text = StringUtils.strip(text);
-		List<SkillSearchStub> result = escoService.searchSkill(text, (isTransversal != null) ? isTransversal : false,
-				size);
+		List<SkillSearchStub> result = escoService.searchSkill(text, isTransversal, size);
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("/api/search/skill:%s" + " size:%s" + "isTransversal:%s", text, isTransversal,
+			logger.info(String.format("/api/search/skill:%s" + " size:%s" + " isTransversal:%s", text, isTransversal,
 					result.size()));
 		}
 		return result;
@@ -44,20 +44,20 @@ public class ESCOController implements SCOController {
 		return escoService.getSkillGroupByUri(uri);
 	}
 
-//	@GetMapping("/api/field/value")
-//	public List<TextDoc> getRowsByFieldValue(@RequestParam String fieldTitle, @RequestParam String fieldValue,
-//			@RequestParam String limit) throws Exception {
-//		List<TextDoc> result = escoService.getField(fieldTitle, fieldValue, Integer.valueOf(limit));
-//		if (logger.isInfoEnabled()) {
-//			logger.info(String.format("/api/search/uri <%s,%s>", fieldTitle, fieldValue));
-//		}
-//		return result;
-//	}
+	@GetMapping("/api/field/value")
+	public List<TextDoc> getRowsByFieldValue(@RequestParam String fieldTitle, @RequestParam String fieldValue,
+			@RequestParam String limit) throws Exception {
+		List<TextDoc> result = escoService.getField(fieldTitle, fieldValue, Integer.valueOf(limit));
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("/api/search/uri <%s,%s>", fieldTitle, fieldValue));
+		}
+		return result;
+	}
 
-//	@GetMapping("/api/lucene/skill/uri")
-//	public List<TextDoc> getTextDocByUri(@RequestParam String url, @RequestParam String limit) throws Exception {
-//		List<TextDoc> result = escoService.getByUri(url, Integer.valueOf(limit));
-//		return result;
-//	}
+	@GetMapping("/api/lucene/skill/uri")
+	public List<TextDoc> getTextDocByUri(@RequestParam String url, @RequestParam String limit) throws Exception {
+		List<TextDoc> result = escoService.getByUri(url, Integer.valueOf(limit));
+		return result;
+	}
 	
 }

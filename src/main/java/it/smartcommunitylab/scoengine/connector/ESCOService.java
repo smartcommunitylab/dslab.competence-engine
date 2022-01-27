@@ -29,13 +29,9 @@ public class ESCOService {
 	public List<SkillSearchStub> searchSkill(String text, Boolean isTransversal, int size) throws Exception {
 		List<SkillSearchStub> result = new ArrayList<>();
 		List<String> uris = new ArrayList<>();
-		uris = luceneManager.searchIdsByFields(text, Const.ESCO_CONCEPT_SKILL, isTransversal, size);
+		uris = luceneManager.searchIdsByFields(text, isTransversal, size);
 		List<Skill> searchList = new ArrayList<>();
-		if (isTransversal) {
-			searchList = skillRepository.findSkill(uris, true);
-		} else {
-			searchList = skillRepository.findSkill(uris, false);
-		}
+		searchList = skillRepository.findByIds(uris);
 		for (Skill sk : searchList) {
 			SkillSearchStub sst = new SkillSearchStub();
 			sst.setConceptType(sk.getConceptType());
