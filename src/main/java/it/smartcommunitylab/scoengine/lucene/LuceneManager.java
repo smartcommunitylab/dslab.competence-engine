@@ -214,7 +214,7 @@ public class LuceneManager {
 		QueryParser parserReuseLevel = new QueryParser("reuseLevel", analyzer);
 		Query reuseLevelQuery = parserReuseLevel.parse(Const.ESCO_TRANSVERSAL_SKILL);
 		QueryParser parserInScheme = new QueryParser("inScheme", analyzer);
-		Query inSchemeQuery = parserInScheme.parse("\"http://data.europa.eu/esco/concept-scheme/skill-language-groups\"");
+		Query inSchemeQuery = parserInScheme.parse("\"" + Const.ESCO_LANGUAGE_GROUP_SCHEME_URI + "\"");
 		BooleanQuery booleanQuery = new BooleanQuery.Builder()
 				.add(inSchemeQuery, BooleanClause.Occur.MUST_NOT)
 				.add(reuseLevelQuery, BooleanClause.Occur.MUST)
@@ -242,7 +242,7 @@ public class LuceneManager {
 		QueryParser parserReuseLevel = new QueryParser("reuseLevel", analyzer);
 		Query reuseLevelQuery = parserReuseLevel.parse(Const.ESCO_TRANSVERSAL_SKILL);
 		QueryParser parserInScheme = new QueryParser("inScheme", analyzer);
-		Query inSchemeQuery = parserInScheme.parse("\"http://data.europa.eu/esco/concept-scheme/skill-language-groups\"");
+		Query inSchemeQuery = parserInScheme.parse("\"" + Const.ESCO_LANGUAGE_GROUP_SCHEME_URI + "\"");
 		BooleanQuery booleanQueryTransversalLanguage = new BooleanQuery.Builder()
 				.add(inSchemeQuery, BooleanClause.Occur.MUST)
 				.add(reuseLevelQuery, BooleanClause.Occur.MUST)

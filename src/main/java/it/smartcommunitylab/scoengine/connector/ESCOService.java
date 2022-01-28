@@ -37,8 +37,9 @@ public class ESCOService {
 			sst.setConceptType(sk.getConceptType());
 			sst.setUri(sk.getUri());
 			sst.setPreferredLabel(sk.getPreferredLabel());
-			sst.setReuseLevel(sk.getReuseLevel());
+//			sst.setReuseLevel(sk.getReuseLevel());
 			sst.setHierarchy(sk.getBroaderSkillLink());
+			sst.setTransversal(sk.isTransversal());
 			result.add(sst);
 		}
 		return result;

@@ -8,9 +8,10 @@ import java.util.Map;
 public class SkillSearchStub {
 	private String uri;
 	private String conceptType;
-	private String reuseLevel;
+//	private String reuseLevel;
 	private Map<String, String> preferredLabel = new HashMap<>();
 	private List<ResourceLink> hierarchy = new ArrayList<>();
+	private boolean isTransversal;
 
 	public String getUri() {
 		return uri;
@@ -28,13 +29,13 @@ public class SkillSearchStub {
 		this.conceptType = conceptType;
 	}
 
-	public String getReuseLevel() {
-		return reuseLevel;
-	}
-
-	public void setReuseLevel(String reuseLevel) {
-		this.reuseLevel = reuseLevel;
-	}
+//	public String getReuseLevel() {
+//		return reuseLevel;
+//	}
+//
+//	public void setReuseLevel(String reuseLevel) {
+//		this.reuseLevel = reuseLevel;
+//	}
 
 	public Map<String, String> getPreferredLabel() {
 		return preferredLabel;
@@ -50,6 +51,14 @@ public class SkillSearchStub {
 
 	public void setHierarchy(List<ResourceLink> hierarchy) {
 		this.hierarchy = hierarchy;
+	}
+
+	public boolean isTransversal() {
+		return isTransversal;
+	}
+
+	public void setTransversal(boolean isTransversal) {
+		this.isTransversal = isTransversal;
 	}
 
 }

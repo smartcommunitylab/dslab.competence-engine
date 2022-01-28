@@ -110,7 +110,14 @@ public class CsvManager {
 			skill.getDescription().put(lang, description);
 			for (String inScheme: record.get("inScheme").split(",")) {
 				if(!skill.getInScheme().contains(inScheme.trim())) {
-					skill.getInScheme().add(inScheme.trim());
+					skill.getInScheme().add(inScheme.trim());				
+				}
+			}
+			if (reuseLevel.equals(Const.ESCO_TRANSVERSAL_SKILL)) {
+				if (skill.getInScheme().indexOf(Const.ESCO_LANGUAGE_GROUP_SCHEME_URI) < 0) {
+					skill.setTransversal(true);
+				} else {
+					skill.setTransversal(false);
 				}
 			}
 			skillRepository.save(skill);

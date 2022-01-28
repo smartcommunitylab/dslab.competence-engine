@@ -17,7 +17,7 @@ public interface SkillRepository extends MongoRepository<Skill, String>, SkillRe
 	@Query(value = "{uri:{$in:?0}}")
 	List<Skill> findByIds(List<String> ids);
 
-	@Query(value = "{uri:{$in:?0}}, 'reuseLevel' : ?1", fields = "{ 'uri':1, 'conceptType':1,'reuseLevel':1, 'description':1, 'preferredLabel':1, 'broaderSkillLink':1}")
+	@Query(value = "{uri:{$in:?0}}, 'reuseLevel' : ?1", fields = "{ 'uri':1, 'conceptType':1,'reuseLevel':1, 'description':1, 'preferredLabel':1, 'broaderSkillLink':1, 'isTransversal':1}")
 	List<Skill> findByIdsByReuseLevel(List<String> ids, String reuseLevel);
 
 }
