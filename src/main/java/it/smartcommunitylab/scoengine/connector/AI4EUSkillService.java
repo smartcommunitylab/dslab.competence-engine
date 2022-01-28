@@ -50,7 +50,8 @@ public class AI4EUSkillService {
 			sst.setConceptType(sk.getConceptType());
 			sst.setUri(sk.getUri());
 			sst.setPreferredLabel(sk.getPreferredLabel());
-			sst.setReuseLevel(sk.getReuseLevel());
+//			sst.setReuseLevel(sk.getReuseLevel());
+			sst.setTransversal(sk.isTransversal());
 			sst.setHierarchy(sk.getBroaderSkillLink());
 			result.add(sst);
 		}
