@@ -17,10 +17,10 @@ Engine for query and navigate ESCO ontology data
 	@RequestParam(required = false) Boolean isTransversal,
 	@RequestParam int size
 	
-The 'isTransversal' flag when set to TRUE will return only the non-language transversal skills in the dataset. The search will
-take in to account the text input.
-The 'isTransversal' flag when set to FALSE will return specific skill along with language based transversal skills. The search will
-take in to account the text input.
+The 'isTransversal' flag when set to TRUE will return only the non-language transversal skills in the datasettaking in to account the text input.
+
+The 'isTransversal' flag when set to FALSE will return specific skill along with language based transversal skillstaking in to account the text input.
+
 The 'isTransversal' flag when not specified will return all skills according to search text.
 
 ## Get Skill
