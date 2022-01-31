@@ -265,7 +265,7 @@ public class LuceneManager {
 		}
 		result.addAll(resultTransversalLanguage);
 		result.addAll(resultSpecific);
-		if (!result.isEmpty()) {
+		if (!result.isEmpty() && result.size() >= maxResult) {
 			result = result.subList(0, maxResult - 1);
 		}
 		return result;
