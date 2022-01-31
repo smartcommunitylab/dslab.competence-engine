@@ -265,7 +265,10 @@ public class LuceneManager {
 		}
 		result.addAll(resultTransversalLanguage);
 		result.addAll(resultSpecific);
-		return result.subList(0, maxResult - 1);
+		if (!result.isEmpty()) {
+			result = result.subList(0, maxResult - 1);
+		}
+		return result;
 	}
 	
 	public List<TextDoc> searchBySingleField(String fieldTitle, String fieldValue, int maxResult)
