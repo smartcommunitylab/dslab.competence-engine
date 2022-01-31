@@ -4,8 +4,8 @@ It manages the datasets for different cores and expore APIs that allows for mani
 to query and navigate skill, competence, occupation ontology data.
 
 # Requirement
-	Java sdk 11.
-	Mongo db.
+	Java SDK 11.
+	Mongo DB version v3.5.6.
 
 # ESCO Core
 Engine for query and navigate ESCO ontology data
@@ -47,7 +47,8 @@ The current version is based on ESCO model v1.0.9. One can download the followin
 	https://ec.europa.eu/esco/portal/download
 
 Select version v1.0.9, type CSV. The files used for SCO Engine are skills_it.csv, skillGroups_it.csv, skillSkillRelations.csv,
-broaderRelationsSkillPillar.csv
+broaderRelationsSkillPillar.csv. The path to the same files corresponds to the 'path' parameter of import and index API call as described
+in 'Data Import' section below.
 
 ## Data Import
 In order to import dataset for manipulation and indexing, one need to call the following APIs
